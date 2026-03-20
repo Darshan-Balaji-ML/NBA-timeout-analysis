@@ -4,6 +4,16 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import seaborn as sns
 
+"""
+journalism_viz.py
+
+Generates a publication-style visualization of NBA timeout timing
+by quarter across 600+ regular season games.
+
+Input:  play_by_play table from nba.db
+Output: timeout_timing.png saved to images/
+Author: Darshan Balaji
+"""
 # --- Load Data ---
 conn = sqlite3.connect("nba.db")
 cursor = conn.cursor()

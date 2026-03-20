@@ -2,6 +2,17 @@ import sqlite3
 import time
 from nba_api.stats.endpoints import leaguegamefinder
 
+"""
+fetch_games.py
+
+Fetches all NBA regular season game IDs and team info for 5 seasons
+from the NBA Stats API and stores them in the games table in nba.db.
+Also initializes the play_by_play table schema.
+
+Input:  NBA Stats API (LeagueGameFinder endpoint)
+Output: games and play_by_play tables in nba.db
+Author: Darshan Balaji
+"""
 conn = sqlite3.connect("nba.db")
 cursor = conn.cursor()
 
@@ -52,6 +63,8 @@ for season in seasons:
 
     df = finder.get_data_frames()[0]
 
+    # Each game appears twice in the DataFrame (once per team)
+    # Filter to home games only using MATCHUP column ("vs." = home, "@" = away)
     for game_id in df["GAME_ID"].unique():
         home_row = df[(df["GAME_ID"] == game_id) & (df["MATCHUP"].str.contains("vs."))]
         away_row = df[(df["GAME_ID"] == game_id) & (df["MATCHUP"].str.contains("@"))]
@@ -70,6 +83,7 @@ for season in seasons:
         """, (game_id, season, home_row["GAME_DATE"].values[0], home_team_id, visitor_team_id, home_tricode, visitor_tricode))
 
     conn.commit()
+    # sleeping to avoid NBA API rate limitng 
     time.sleep(0.7)
 
 cursor.execute("SELECT COUNT(*) FROM games")

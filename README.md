@@ -4,6 +4,13 @@ Overview:
 This project investigates whether NBA coaches' most common momentum-stopping strategy — calling a timeout during an opponent's scoring run — actually works. Using play-by-play data from 601 NBA regular season games, I built a full data pipeline, conducted statistical analysis, and trained a machine learning model to predict timeout effectiveness.
 The findings:
 Analyzing games from 2019-20 regular season, EDA revealed a surprising finding: teams that called a timeout during an opponent's 8-0+ run actually allowed more scoring afterward (5.26 pts) compared to runs where no timeout was called (4.28 pts) — a statistically significant difference (p=1.79e-11). A Random Forest classifier trained to predict timeout effectiveness confirmed this, achieving an AUC of 0.56, suggesting timeout effectiveness is largely unpredictable from game state alone.
+
+## Visualizations
+
+![Timeout Timing](images/timeout_timing.png)
+![Feature Importance](images/feature_importance.png)
+![Confusion Matrix](images/confusion_matrix.png)
+![ROC Curve](images/roc_curve.png)
 How it Works:
 File Structure:
 ├── fetch_games.py # Pulls game IDs and team info from NBA API → SQLite 

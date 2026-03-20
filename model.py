@@ -9,6 +9,18 @@ from sklearn.metrics import RocCurveDisplay
 from sklearn.linear_model import LogisticRegression
 import matplotlib.pyplot as plt
 
+"""
+model.py
+
+Trains a Random Forest classifier to predict whether a timeout called
+during an 8-0+ scoring run will be effective in slowing the run team's
+subsequent scoring (defined as <= 4 points in the next 5 possessions).
+
+Input:  runs table from nba.db
+Output: Classification report, feature importance chart, confusion matrix,
+        ROC curve saved to images/, and Logistic Regression comparison
+Author: Darshan Balaji
+"""
 
 conn = sqlite3.connect("nba.db")
 cursor = conn.cursor()
@@ -17,13 +29,16 @@ cursor.execute("SELECT * FROM runs")
 rows = cursor.fetchall()
 columns = ["game_id", "run_team", "run_points", "start_action", "end_action", "timeout_called", "pts_allowed_after", "period", "clock_seconds", "score_margin","timeout_team_is_home"]
 runs_df = pd.DataFrame(rows, columns=columns)
+# Define timeout as effective if run team scores 4 or fewer points after
 runs_df["timeout_effective"] = (runs_df["pts_allowed_after"] <= 4).astype(int)
 conn.close()
+# Only train on runs where a timeout was called
 model_df = runs_df[runs_df["timeout_called"] == 1]
 
 X = model_df[["run_points", "period", "clock_seconds", "score_margin", "timeout_team_is_home"]]
 Y = model_df["timeout_effective"]
 
+# 80/20 train/test split with fixed random state for reproducibility
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
 model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight="balanced")

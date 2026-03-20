@@ -1,6 +1,16 @@
 import sqlite3
 import pandas as pd
+"""
+detect_runs.py
 
+Detects 8-0+ scoring runs from NBA play-by-play data, identifies whether
+a timeout was called during each run, and engineers contextual features
+(clock time, score margin, period, home/away) for machine learning analysis.
+
+Input: play_by_play and games tables from nba.db
+Output: runs table in nba.db with all engineered features
+Author: Darshan Balaji
+"""
 # --- Connect to DB ---
 conn = sqlite3.connect("nba.db")
 cursor = conn.cursor()
@@ -49,6 +59,16 @@ scoring["scoring_team"] = scoring.apply(
 
 # --- Run Detection ---
 def detect_runs(game_df):
+    """
+    Detects all 8-0+ scoring runs in a single game.
+
+    Args:
+        game_df (DataFrame): Scoring events for a single game, ordered by action_number
+
+    Returns:
+        list: List of dicts, each representing a run with keys:
+              game_id, run_team, run_points, start_action, end_action
+    """
     current_team = None
     current_pts = 0
     current_start = None
@@ -91,6 +111,15 @@ print(f"Total runs detected: {len(all_runs)}")
 timeouts = df[df["action_type"] == "Timeout"]
 
 def check_timeout(run):
+    """
+    Checks whether the trailing team called a timeout during a run.
+
+    Args:
+        run (Series): A single row from runs_df
+
+    Returns:
+        bool: True if a timeout was called by the trailing team during the run
+    """
     mask = (
         (timeouts["game_id"] == run["game_id"]) &
         (timeouts["action_number"] >= run["start_action"]) &
@@ -102,6 +131,20 @@ def check_timeout(run):
 
 # --- Next 5 Possessions + Score Margin + Home/Away ---
 def get_next_possessions(run, df, games_df, n=5):
+    """
+    For a given run, calculates contextual features and tracks the run team's
+    scoring in the next n possessions after the timeout (or end of run).
+
+    Args:
+        run (Series): A single row from runs_df
+        df (DataFrame): Full play-by-play DataFrame
+        games_df (DataFrame): Games metadata including home/away tricodes
+        n (int): Number of possessions to track after the run
+
+    Returns:
+        dict: Contains pts_allowed_after, period, clock_seconds, 
+              score_margin, timeout_team_is_home. Returns None if data unavailable.
+    """
     game_df = df[df["game_id"] == run["game_id"]]
 
     # --- Game Info ---
