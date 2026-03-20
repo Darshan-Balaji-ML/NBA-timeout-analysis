@@ -1,0 +1,15 @@
+# Virtual environment
+nba_env/
+
+# Database (too large for GitHub)
+nba.db
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Mac system files
+.DS_Store
+
+# Failed games log
+failed_games.txt
